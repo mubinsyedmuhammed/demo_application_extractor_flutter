@@ -1,8 +1,23 @@
+import 'package:demo_application_extractor_ui/viewmodels/background_service_viewmodel.dart';
+import 'package:demo_application_extractor_ui/views/home_view.dart';
 import 'package:flutter/material.dart';
-import 'view/Home_screen.dart';
+import 'package:provider/provider.dart';
+import 'utils/service_locator.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  setupServiceLocator();
+  
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => BackgroundServiceViewModel(),
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -11,8 +26,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MyHomePage(title: 'Demo Home Screen'),
+      title: 'Background Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const HomeView(),
     );
   }
 }
-
