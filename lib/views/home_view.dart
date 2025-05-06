@@ -1,27 +1,38 @@
 // lib/views/home_view.dart
-import 'package:demo_application_extractor_ui/viewmodels/background_service_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../viewmodels/background_service_viewmodel.dart';
+import 'interfaces/i_base_view.dart';
+import 'components/service_status_widget.dart';
+import 'components/service_control_button.dart';
 
-class HomeView extends StatefulWidget {
+class HomeView extends IBaseView {
   const HomeView({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _HomeViewState createState() => _HomeViewState();
+  HomeViewState createState() => HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
+class HomeViewState extends IBaseViewState<HomeView> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    
-    // Initialize service on app start
+    initializeViewModel();
+    setupEventListeners();
+  }
+
+  @override
+  void initializeViewModel() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final viewModel = Provider.of<BackgroundServiceViewModel>(context, listen: false);
       await viewModel.initializeService();
     });
+  }
+
+  @override
+  void setupEventListeners() {
+    // Add any additional event listeners here
   }
   
   @override
@@ -42,7 +53,6 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
         }
         break;
       case AppLifecycleState.resumed:
-        // Optional: Handle resume state
         break;
       default:
         break;
@@ -55,38 +65,20 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
       appBar: AppBar(
         title: const Text('Background App Demo'),
       ),
-      body: Consumer<BackgroundServiceViewModel>(
-        builder: (context, viewModel, child) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  viewModel.appState.isBackgroundServiceRunning
-                      ? 'App is running in background'
-                      : 'App is not running in background',
-                  style: TextStyle(fontSize: 18),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: viewModel.appState.isBackgroundServiceRunning
-                      ? viewModel.stopBackgroundService
-                      : viewModel.startBackgroundService,
-                  child: Text(
-                    viewModel.appState.isBackgroundServiceRunning
-                        ? 'Stop Background Service'
-                        : 'Start Background Service',
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Minimize the app to see the floating message',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-              ],
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            ServiceStatusWidget(),
+            SizedBox(height: 20),
+            ServiceControlButton(),
+            SizedBox(height: 20),
+            Text(
+              'Minimize the app to see the floating message',
+              style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
